@@ -14,8 +14,8 @@ import android.util.AttributeSet;
 import android.view.View;
 
 public class UnderLineEditText extends AppCompatEditText implements View.OnFocusChangeListener {
-    private static final int DEFAULT_CODE_LENGTH = 10;
-    private static final String DEFAULT_CODE_SYMBOL = "0";
+    private static final int DEFAULT_CODE_LENGTH = 8;
+    private static final int DEFAULT_TEXT_BOTTOM_MARGIN = 20;
 
 
     private Paint textPaint;
@@ -26,7 +26,6 @@ public class UnderLineEditText extends AppCompatEditText implements View.OnFocus
     private int textColor;
     private float sectionWidth;
     private int codeLength;
-    private float symbolWidth;
     private float underlineReductionScale;
     private int underlineDefaultColor;
     private int underlineSelectedColor;
@@ -78,6 +77,7 @@ public class UnderLineEditText extends AppCompatEditText implements View.OnFocus
         underlineSelectedColor = attributes.getColor(R.styleable.UnderLineEditText_underline_selected_color, Color.RED);
         underlineStrokeWidth = attributes.getDimension(R.styleable.UnderLineEditText_underline_stroke_width, 5);
         codeLength = attributes.getInt(R.styleable.UnderLineEditText_char_length, DEFAULT_CODE_LENGTH);
+        setFilters(new InputFilter[]{new InputFilter.LengthFilter(codeLength)});
     }
 
 
@@ -88,7 +88,7 @@ public class UnderLineEditText extends AppCompatEditText implements View.OnFocus
         codeLength = DEFAULT_CODE_LENGTH;
         setOnFocusChangeListener(this);
 
-        setFilters(new InputFilter[]{new InputFilter.LengthFilter(codeLength)});
+
         setCursorVisible(false);
     }
 
@@ -125,11 +125,9 @@ public class UnderLineEditText extends AppCompatEditText implements View.OnFocus
             throw new IllegalArgumentException("Code length must be over than zero");
         }
 
-        symbolWidth = textPaint.measureText(DEFAULT_CODE_SYMBOL);
-        textPaint.getTextBounds(DEFAULT_CODE_SYMBOL, 0, 1, textBounds);
         sectionWidth = viewWidth / codeLength;
         underlinePosY = viewHeight;
-        textPosY = viewHeight / 2 + textBounds.height() / 2;
+        textPosY = (viewHeight - DEFAULT_TEXT_BOTTOM_MARGIN) + textBounds.height();
     }
 
     @Override
@@ -142,7 +140,7 @@ public class UnderLineEditText extends AppCompatEditText implements View.OnFocus
     private void drawText(Canvas canvas) {
         for (int i = 0; i < getText().length(); i++) {
             char[] symbol = {getText().charAt(i)};
-            float textPosX = sectionWidth * i + sectionWidth / 2 - symbolWidth / 2;
+            float textPosX = sectionWidth * i + sectionWidth / 2 / 2;
             canvas.drawText(symbol, 0, 1, textPosX, textPosY, textPaint);
         }
     }
