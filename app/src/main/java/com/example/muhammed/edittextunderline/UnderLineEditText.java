@@ -2,11 +2,11 @@ package com.example.muhammed.edittextunderline;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.graphics.Typeface;
-import android.os.Build;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.AppCompatEditText;
 import android.text.InputFilter;
@@ -15,15 +15,11 @@ import android.view.View;
 
 public class UnderLineEditText extends AppCompatEditText implements View.OnFocusChangeListener {
     private static final int DEFAULT_CODE_LENGTH = 10;
-    private static final String DEFAULT_CODE_MASK = "*";
     private static final String DEFAULT_CODE_SYMBOL = "0";
-    private static final String DEFAULT_REGEX = "[^0-9]";
-    private static final float DEFAULT_REDUCTION_SCALE = 0.5f;
 
 
     private Paint textPaint;
     private Paint underlinePaint;
-    private Paint cursorPaint;
 
     private float textSize;
     private float textPosY;
@@ -31,21 +27,13 @@ public class UnderLineEditText extends AppCompatEditText implements View.OnFocus
     private float sectionWidth;
     private int codeLength;
     private float symbolWidth;
-    private float symbolMaskedWidth;
-    private float underlineHorizontalPadding;
     private float underlineReductionScale;
-    private float underlineStrokeWidth;
-    private int underlineBaseColor;
+    private int underlineDefaultColor;
     private int underlineSelectedColor;
-    private int underlineFilledColor;
-    private int underlineCursorColor;
+
     private float underlinePosY;
-    private int fontStyle;
-    private boolean cursorEnabled;
-    private boolean codeHiddenMode;
-    private boolean isSelected;
-    private String codeHiddenMask;
     private Rect textBounds = new Rect();
+    private float underlineStrokeWidth;
 
     public UnderLineEditText(Context context) {
         super(context);
@@ -74,42 +62,34 @@ public class UnderLineEditText extends AppCompatEditText implements View.OnFocus
         textPaint = new Paint();
         textPaint.setColor(textColor);
         textPaint.setTextSize(textSize);
-        textPaint.setTypeface(Typeface.create(Typeface.DEFAULT, fontStyle));
         textPaint.setAntiAlias(true);
 
         underlinePaint = new Paint();
-        underlinePaint.setColor(underlineBaseColor);
+        underlinePaint.setColor(underlineDefaultColor);
         underlinePaint.setStrokeWidth(underlineStrokeWidth);
-
-        cursorPaint = new Paint();
-        cursorPaint.setColor(underlineBaseColor);
-        cursorPaint.setStrokeWidth(underlineStrokeWidth);
     }
 
-    private void initCustomAttrs(Context context, AttributeSet attrs) {
+    private void initCustomAttrs(Context context, AttributeSet attributeSet) {
+        if (attributeSet == null) return;
+        TypedArray attributes = context.obtainStyledAttributes(
+                attributeSet, R.styleable.UnderLineEditText);
 
+        underlineDefaultColor = attributes.getColor(R.styleable.UnderLineEditText_underline_default_color, Color.BLACK);
+        underlineSelectedColor = attributes.getColor(R.styleable.UnderLineEditText_underline_selected_color, Color.RED);
+        underlineStrokeWidth = attributes.getDimension(R.styleable.UnderLineEditText_underline_stroke_width, 5);
+        codeLength = attributes.getInt(R.styleable.UnderLineEditText_char_length, DEFAULT_CODE_LENGTH);
     }
 
 
     private void initDefaultAttrs(Context context) {
         Resources resources = context.getResources();
-
-        underlineReductionScale = DEFAULT_REDUCTION_SCALE;
-        underlineStrokeWidth = resources.getDimension(R.dimen.underline_stroke_width);
-        underlineBaseColor = ContextCompat.getColor(context, R.color.underline_base_color);
-        underlineFilledColor = ContextCompat.getColor(context, R.color.underline_filled_color);
-        underlineCursorColor = ContextCompat.getColor(context, R.color.underline_cursor_color);
-        underlineSelectedColor = ContextCompat.getColor(context, R.color.underline_selected_color);
         textSize = resources.getDimension(R.dimen.code_text_size);
         textColor = ContextCompat.getColor(context, R.color.text_main_color);
         codeLength = DEFAULT_CODE_LENGTH;
-        codeHiddenMask = DEFAULT_CODE_MASK;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            setLetterSpacing(0.42f);
-        }
         setOnFocusChangeListener(this);
 
         setFilters(new InputFilter[]{new InputFilter.LengthFilter(codeLength)});
+        setCursorVisible(false);
     }
 
     @Override
@@ -146,35 +126,33 @@ public class UnderLineEditText extends AppCompatEditText implements View.OnFocus
         }
 
         symbolWidth = textPaint.measureText(DEFAULT_CODE_SYMBOL);
-        symbolMaskedWidth = textPaint.measureText(codeHiddenMask);
         textPaint.getTextBounds(DEFAULT_CODE_SYMBOL, 0, 1, textBounds);
         sectionWidth = viewWidth / codeLength;
         underlinePosY = viewHeight;
-        underlineHorizontalPadding = sectionWidth * underlineReductionScale / 2;
         textPosY = viewHeight / 2 + textBounds.height() / 2;
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         drawUnderline(canvas);
-//        drawText(canvas);
-        super.onDraw(canvas);
+        drawText(canvas);
+//        super.onDraw(canvas);
     }
 
-//    private void drawText(Canvas canvas) {
-//        for (int i = 0; i < getText().length(); i++) {
-//            char[] symbol = {getText().charAt(i)};
-//            float textPosX = sectionWidth * i + sectionWidth / 2 - symbolWidth / 2;
-//            canvas.drawText(symbol, 0, 1, textPosX, textPosY, textPaint);
-//        }
-//    }
+    private void drawText(Canvas canvas) {
+        for (int i = 0; i < getText().length(); i++) {
+            char[] symbol = {getText().charAt(i)};
+            float textPosX = sectionWidth * i + sectionWidth / 2 - symbolWidth / 2;
+            canvas.drawText(symbol, 0, 1, textPosX, textPosY, textPaint);
+        }
+    }
 
 
     private void drawUnderline(Canvas canvas) {
         for (int i = 0; i < codeLength; i++) {
             float startPosX = sectionWidth * i;
             float endPosX = startPosX + sectionWidth * 2;
-            underlinePaint.setColor(underlineSelectedColor);
+            underlinePaint.setColor(underlineDefaultColor);
             canvas.drawLine(startPosX, underlinePosY, endPosX, underlinePosY, underlinePaint);
 
         }
@@ -183,9 +161,9 @@ public class UnderLineEditText extends AppCompatEditText implements View.OnFocus
     @Override
     public void onFocusChange(View v, boolean hasFocus) {
         if (hasFocus) {
-            underlineSelectedColor = ContextCompat.getColor(getContext(), R.color.underline_filled_color);
+            underlineDefaultColor = underlineSelectedColor;
         } else {
-            underlineSelectedColor = ContextCompat.getColor(getContext(), R.color.text_main_color);
+            underlineDefaultColor = Color.BLACK;
         }
 
         invalidate();

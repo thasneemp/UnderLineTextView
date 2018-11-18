@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="UnderLineEditText">
+        <attr name="underline_default_color" format="color" />
+        <attr name="underline_selected_color" format="color" />
+        <attr name="underline_stroke_width" format="dimension" />
+        <attr name="char_length" format="integer" />
+    </declare-styleable>
+</resources>

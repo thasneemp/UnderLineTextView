@@ -7,17 +7,30 @@
     tools:context=".MainActivity">
 
     <com.example.muhammed.edittextunderline.UnderLineEditText
+        android:id="@+id/underLineEditText"
         android:layout_width="wrap_content"
         android:layout_height="40dp"
+        android:layout_marginStart="10dp"
         android:layout_marginLeft="10dp"
         android:layout_marginTop="20dp"
         android:background="@android:color/transparent"
         android:digits="1234567890"
         android:inputType="phone"
+        android:maxLines="2"
         android:singleLine="true"
+        android:text="111111111"
         android:textColor="@color/colorPrimary"
-        android:textSize="30sp"
+        app:char_length="8"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginStart="10dp" />
+        app:underline_default_color="@color/colorPrimary"
+        app:underline_selected_color="@color/colorAccent"
+        app:underline_stroke_width="3dp" />
+
+    <android.support.v7.widget.AppCompatEditText
+        android:layout_width="match_parent"
+
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@+id/underLineEditText" />
 </android.support.constraint.ConstraintLayout>
